@@ -20,7 +20,7 @@ export default function CertificateViewer() {
   useEffect(() => {
     const certId = params.id as string;
     const cert = certificates.find(c => c.id === certId);
-    setCertificate(cert);
+    setCertificate(cert || null);
     setCurrentViewingCert(cert || null);
   }, [params.id, certificates, setCurrentViewingCert]);
 
@@ -88,7 +88,7 @@ export default function CertificateViewer() {
       {/* File Viewer - Full Screen */}
       <div className="absolute inset-0">
         <UniversalFileViewer 
-          fileUrl={certificate.fileUrl || certificate.pdfUrl} 
+          fileUrl={certificate.fileUrl || certificate.pdfUrl || ''} 
           fileName={certificate.name}
           className="w-full h-full"
         />

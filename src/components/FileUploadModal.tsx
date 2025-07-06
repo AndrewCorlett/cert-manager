@@ -70,7 +70,6 @@ export default function FileUploadModal({ isOpen, onClose, onFileUpload }: FileU
       scale: 0.8,
       transition: {
         duration: 0.2,
-        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
     visible: {
@@ -78,7 +77,6 @@ export default function FileUploadModal({ isOpen, onClose, onFileUpload }: FileU
       scale: 1,
       transition: {
         duration: 0.3,
-        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
   };

@@ -42,7 +42,7 @@ export const useThemeStore = create<ThemeStore>()(
     }),
     {
       name: 'cert-manager-theme', // localStorage key
-      onRehydrate: (state) => {
+      onRehydrateStorage: () => (state) => {
         // Apply theme on page load
         if (typeof window !== 'undefined' && state) {
           document.documentElement.setAttribute('data-theme', state.theme);

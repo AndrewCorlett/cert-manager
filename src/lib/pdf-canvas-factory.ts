@@ -20,14 +20,14 @@ export class NodeCanvasFactory {
     };
   }
 
-  reset(canvasAndContext: any, width: number, height: number) {
+  reset(canvasAndContext: { canvas?: HTMLCanvasElement | null; context?: CanvasRenderingContext2D | null }, width: number, height: number) {
     if (canvasAndContext.canvas) {
       canvasAndContext.canvas.width = width;
       canvasAndContext.canvas.height = height;
     }
   }
 
-  destroy(canvasAndContext: any) {
+  destroy(canvasAndContext: { canvas?: HTMLCanvasElement | null; context?: CanvasRenderingContext2D | null }) {
     if (canvasAndContext.canvas) {
       canvasAndContext.canvas.width = 0;
       canvasAndContext.canvas.height = 0;

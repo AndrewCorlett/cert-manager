@@ -6,15 +6,28 @@ import { Button } from '@/components/ui/button';
 import FloatingNavBar, { NavMode } from '@/components/FloatingNavBar';
 import { useCertStore } from '@/lib/store';
 import { extractTextFromPDF, assessDocumentQuality } from '@/lib/pdf-text-extractor';
-import { analyzeDocument, categorizeCertificate } from '@/lib/openai-client';
+import { analyzeDocument } from '@/lib/openai-client';
 
 export default function UploadPage() {
   const [navMode, setNavMode] = useState<NavMode>('collapsed');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [aiResults, setAiResults] = useState<any>(null);
-  const [qualityAssessment, setQualityAssessment] = useState<any>(null);
+  const [aiResults, setAiResults] = useState<{
+    certificateName?: string | null;
+    category?: string;
+    confidence?: number;
+    extraction?: { text: string; pageCount: number; quality: string; isScanned: boolean; extractionTime: number };
+    fileName?: string;
+    issueDate?: string | null;
+    expiryDate?: string | null;
+    certificateNumber?: string | null;
+    issuingAuthority?: string | null;
+  } | null>(null);
+  const [qualityAssessment, setQualityAssessment] = useState<{
+    textQuality: string;
+    issues: string[];
+  } | null>(null);
   const addCertificate = useCertStore((state) => state.addCertificate);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,8 +91,8 @@ export default function UploadPage() {
     const defaultExpiry = new Date(now.getTime() + 5 * 365 * 24 * 60 * 60 * 1000); // 5 years default
     
     addCertificate({
-      name: aiResults.certificateName || aiResults.fileName,
-      category: aiResults.category || 'Other',
+      name: aiResults.certificateName || aiResults.fileName || 'Untitled Certificate',
+      category: (aiResults.category as 'STCW' | 'GWO' | 'OPITO' | 'Contracts' | 'Other') || 'Other',
       filePath: `/certificates/${selectedFile.name}`,
       issueDate: aiResults.issueDate || now.toISOString().split('T')[0],
       expiryDate: aiResults.expiryDate || defaultExpiry.toISOString().split('T')[0],
@@ -268,7 +281,7 @@ export default function UploadPage() {
                   >
                     AI Analysis Results
                   </span>
-                  {aiResults.confidence > 0 && (
+                  {(aiResults.confidence ?? 0) > 0 && (
                     <span 
                       className="text-xs px-2 py-1 rounded"
                       style={{ 
@@ -276,7 +289,7 @@ export default function UploadPage() {
                         color: 'var(--grey-900)'
                       }}
                     >
-                      {Math.round(aiResults.confidence * 100)}% confident
+                      {Math.round((aiResults.confidence ?? 0) * 100)}% confident
                     </span>
                   )}
                 </div>
@@ -354,7 +367,7 @@ export default function UploadPage() {
         )}
       </div>
 
-      <FloatingNavBar onModeChange={setNavMode}>
+      <FloatingNavBar onModeChange={setNavMode} mode={navMode}>
         {/* No expanded content needed for upload page */}
       </FloatingNavBar>
     </div>

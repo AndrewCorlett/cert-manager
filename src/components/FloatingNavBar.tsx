@@ -10,13 +10,13 @@ export type NavMode = 'collapsed' | 'list' | 'send.step1' | 'send.step2' | 'sett
 interface FloatingNavBarProps {
   onModeChange?: (mode: NavMode) => void;
   children?: React.ReactNode;
+  mode?: NavMode;
 }
 
-export default function FloatingNavBar({ onModeChange, children }: FloatingNavBarProps) {
-  const [mode, setMode] = useState<NavMode>('collapsed');
+export default function FloatingNavBar({ onModeChange, children, mode: externalMode }: FloatingNavBarProps) {
+  const [mode, setMode] = useState<NavMode>(externalMode || 'collapsed');
   const [dragProgress, setDragProgress] = useState(0); // 0 = fully open, 1 = fully closed
   const [isAnimating, setIsAnimating] = useState(false);
-  const [dragStartY, setDragStartY] = useState(0);
   const [currentDragY, setCurrentDragY] = useState(0);
   const [contentHeight, setContentHeight] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -127,10 +127,9 @@ export default function FloatingNavBar({ onModeChange, children }: FloatingNavBa
 
   const handleDragStart = () => {
     if (!isExpanded) return;
-    setDragStartY(currentDragY);
   };
 
-  const handleDrag = (event: any, info: any) => {
+  const handleDrag = (_event: MouseEvent | TouchEvent | PointerEvent, info: { offset: { y: number } }) => {
     if (!isExpanded || isAnimating) return;
     
     const dragDistance = info.offset.y;
@@ -147,7 +146,7 @@ export default function FloatingNavBar({ onModeChange, children }: FloatingNavBa
     setDragProgress(progress);
   };
 
-  const handleDragEnd = (event: any, info: any) => {
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: { velocity: { y: number } }) => {
     if (!isExpanded) return;
     
     const velocity = info.velocity.y;
@@ -215,7 +214,6 @@ export default function FloatingNavBar({ onModeChange, children }: FloatingNavBa
       borderRadius: '36px',
       transition: {
         duration: isAnimating ? 0.3 : 0,
-        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
     expanded: {
@@ -223,7 +221,6 @@ export default function FloatingNavBar({ onModeChange, children }: FloatingNavBa
       borderRadius: getNavbarRadius(),
       transition: {
         duration: isAnimating ? 0.3 : 0,
-        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
   };
@@ -239,7 +236,6 @@ export default function FloatingNavBar({ onModeChange, children }: FloatingNavBa
       y: 0,
       transition: {
         duration: 0.18,
-        ease: [0.25, 0.46, 0.45, 0.94],
         delay: 0.1,
       },
     },
@@ -328,8 +324,7 @@ export default function FloatingNavBar({ onModeChange, children }: FloatingNavBa
                     }}
                     transition={{ 
                       duration: 0.4, 
-                      ease: [0.25, 0.46, 0.45, 0.94],
-                    }}
+                                  }}
                     onClick={() => handleIconClick(icon)}
                     className="p-2 rounded-full"
                   >
@@ -439,8 +434,7 @@ export default function FloatingNavBar({ onModeChange, children }: FloatingNavBa
                   }}
                   transition={{ 
                     duration: isAnimating ? 0.4 : 0,
-                    ease: [0.25, 0.46, 0.45, 0.94],
-                  }}
+                              }}
                   onClick={() => handleIconClick(icon)}
                   className={`p-${iconProps.size === 32 ? '3' : '2'} rounded-full absolute`}
                   style={{

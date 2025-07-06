@@ -44,6 +44,7 @@ export async function extractTextFromPDF(pdfUrl: string): Promise<TextExtraction
       
       // Combine text items with proper spacing
       const pageText = textContent.items
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .map((item: any) => {
           if (item.str) {
             return item.str;

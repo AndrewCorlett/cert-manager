@@ -50,14 +50,12 @@ export default function SendPanel({ step, onStepChange, onSend, currentCertId }:
       x: 0,
       transition: {
         duration: 0.3,
-        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
     step2: {
       x: '-100%',
       transition: {
         duration: 0.3,
-        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
   };
@@ -67,14 +65,12 @@ export default function SendPanel({ step, onStepChange, onSend, currentCertId }:
       x: '100%',
       transition: {
         duration: 0.3,
-        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
     step2: {
       x: 0,
       transition: {
         duration: 0.3,
-        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
   };
