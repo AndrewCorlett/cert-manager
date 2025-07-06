@@ -403,150 +403,92 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
         </AnimatePresence>
 
         {/* Icons Row - positioned at bottom */}
-        <div className={`flex items-center h-[72px] relative overflow-hidden ${isExpanded ? 'px-5' : 'px-6'}`}>
-          {!isExpanded ? (
-            // Collapsed state: use flexbox for perfect spacing
-            <div className="flex items-center justify-between w-full">
-              {['home', 'list', 'send', 'settings'].map((icon) => {
-                const isActiveIcon = icon === activeIcon;
-                
-                return (
-                  <motion.button
-                    key={icon}
-                    data-icon={icon}
-                    initial={false}
-                    animate={{
-                      opacity: 1,
-                      scale: 1,
-                      x: 0,
-                    }}
-                    transition={{ 
-                      duration: 0.4, 
-                                  }}
-                    onClick={() => handleIconClick(icon)}
-                    className="p-2 rounded-full"
-                  >
-                    {icon === 'home' && (
-                      <Home
-                        size={28}
-                        color={isActiveIcon ? '#C89B3C' : '#FFFFFF'}
-                        strokeWidth={2.5}
-                      />
-                    )}
-                    {icon === 'list' && (
-                      <List
-                        size={28}
-                        color={isActiveIcon ? '#C89B3C' : '#FFFFFF'}
-                        strokeWidth={2.5}
-                      />
-                    )}
-                    {icon === 'send' && (
-                      <Send
-                        size={28}
-                        color={isActiveIcon ? '#C89B3C' : '#FFFFFF'}
-                        strokeWidth={2.5}
-                      />
-                    )}
-                    {icon === 'settings' && (
-                      <Settings
-                        size={28}
-                        color={isActiveIcon ? '#C89B3C' : '#FFFFFF'}
-                        strokeWidth={2.5}
-                      />
-                    )}
-                  </motion.button>
-                );
-              })}
-            </div>
-          ) : (
-            // Expanded state: complex positioning for choreographed movement
-            ['home', 'list', 'send', 'settings'].map((icon, index) => {
-              const isActiveIcon = icon === activeIcon;
+        <div className="flex items-center h-[72px] relative overflow-hidden px-6">
+          {['home', 'list', 'send', 'settings'].map((icon, index) => {
+            const isActiveIcon = icon === activeIcon;
+            
+            // Calculate unified icon positions for smooth transitions
+            const getIconProps = () => {
+              // Calculate collapsed positions (evenly spaced)
+              const totalWidth = 280; // Available width for icon distribution
+              const iconSpacing = totalWidth / 3; // 3 gaps between 4 icons
+              const startOffset = -totalWidth / 2; // Start from left edge
+              const collapsedX = startOffset + (index * iconSpacing);
               
-              // Calculate icon positions and properties based on drag progress
-              const getIconProps = () => {
+              if (!isExpanded) {
+                // Collapsed state: all icons in their natural positions
+                return {
+                  x: collapsedX,
+                  y: 0,
+                  opacity: 1,
+                  scale: 1,
+                  color: isActiveIcon ? '#C89B3C' : '#FFFFFF',
+                  size: 28,
+                };
+              } else {
+                // Expanded state with drag progress
                 if (isActiveIcon) {
-                  // Active icon: interpolate between left position (expanded) and center (collapsed) based on drag progress
+                  // Active icon: interpolate between left position (expanded) and collapsed position based on drag progress
                   const expandedX = -150; // translateX(-150px) when fully expanded (left side)
-                  const collapsedX = 0; // Center position when collapsed
                   
-                  // Clamp dragProgress to ensure icons never move past their rest position
-                  // When dragProgress is 1, icons should be at their collapsed positions (not beyond)
                   const clampedProgress = Math.min(1, Math.max(0, dragProgress));
-                  
-                  // Interpolate based on clamped drag progress (0 = expanded, 1 = collapsed)
                   const currentX = expandedX + (collapsedX - expandedX) * clampedProgress;
                   const currentScale = 1.1 + (1 - 1.1) * clampedProgress; // Scale from 1.1 to 1.0
-                  const currentColor = clampedProgress > 0.5 ? '#FFFFFF' : '#C89B3C'; // Change color at 50% drag
+                  const currentColor = clampedProgress > 0.5 ? '#FFFFFF' : '#C89B3C';
                   const currentSize = 32 + (28 - 32) * clampedProgress; // Size from 32 to 28
                   
                   return {
                     x: currentX,
-                    y: 0, // Always stay at same vertical level
+                    y: 0,
                     opacity: 1,
                     scale: currentScale,
                     color: currentColor,
                     size: currentSize,
-                    position: 'absolute' as const,
-                    left: '50%',
                   };
                 } else {
-                  // Inactive icons: interpolate between off-screen (expanded) and visible positions (collapsed) - horizontal only
-                  // Calculate even spacing for 4 icons in a ~320px container (with padding)
-                  // Icons should be spaced from left to right: Home, List, Send, Settings
-                  const totalWidth = 280; // Available width for icon distribution
-                  const iconSpacing = totalWidth / 3; // 3 gaps between 4 icons
-                  const startOffset = -totalWidth / 2; // Start from left edge
-                  
-                  const collapsedX = startOffset + (index * iconSpacing);
-                  
-                  // When expanded, move icons off-screen based on their natural side
-                  // Home and List (indices 0,1) go left, Send and Settings (indices 2,3) go right
+                  // Inactive icons: interpolate between off-screen and collapsed positions
                   const isLeftSideIcon = index <= 1; // home, list
                   const expandedX = isLeftSideIcon ? -250 : 250; // Off-screen positions
                   
-                  // Clamp dragProgress to ensure icons never move past their rest position
                   const clampedProgress = Math.min(1, Math.max(0, dragProgress));
-                  
-                  // Interpolate based on clamped drag progress (0 = expanded/hidden, 1 = collapsed/visible)
                   const currentX = expandedX + (collapsedX - expandedX) * clampedProgress;
                   const currentOpacity = clampedProgress; // Fade in as user drags toward collapsed
                   
                   return {
                     x: currentX,
-                    y: 0, // Always stay at same vertical level
+                    y: 0,
                     opacity: currentOpacity,
                     scale: 1,
                     color: '#FFFFFF',
                     size: 28,
-                    position: 'absolute' as const,
-                    left: '50%',
                   };
                 }
-              };
-              
-              const iconProps = getIconProps();
-              
-              return (
-                <motion.button
-                  key={icon}
-                  data-icon={icon}
-                  initial={false}
-                  animate={{
-                    x: iconProps.x,
-                    y: iconProps.y,
-                    opacity: iconProps.opacity,
-                    scale: iconProps.scale,
-                  }}
-                  transition={{ 
-                    duration: isAnimating ? 0.4 : 0,
-                              }}
-                  onClick={() => handleIconClick(icon)}
-                  className={`p-${iconProps.size === 32 ? '3' : '2'} rounded-full absolute`}
-                  style={{
-                    left: iconProps.left,
-                  }}
-                >
+              }
+            };
+            
+            const iconProps = getIconProps();
+            
+            return (
+              <motion.button
+                key={icon}
+                data-icon={icon}
+                initial={false}
+                animate={{
+                  x: iconProps.x,
+                  y: iconProps.y,
+                  opacity: iconProps.opacity,
+                  scale: iconProps.scale,
+                }}
+                transition={{ 
+                  duration: isAnimating ? 0.4 : 0,
+                  ease: [0.25, 0.46, 0.45, 0.94]
+                }}
+                onClick={() => handleIconClick(icon)}
+                className="absolute p-2 rounded-full"
+                style={{
+                  left: '50%',
+                }}
+              >
                   {icon === 'home' && (
                     <Home
                       size={iconProps.size}
@@ -577,8 +519,7 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
                   )}
                 </motion.button>
               );
-            })
-          )}
+            })}
         </div>
       </motion.div>
     </>

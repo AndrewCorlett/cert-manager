@@ -40,7 +40,7 @@ export default function Home() {
   const renderPanelContent = () => {
     switch (navMode) {
       case 'list':
-        return <FileTree />;
+        return <FileTree onFileSelect={handleFileSelect} />;
       case 'send.step1':
         return (
           <SendPanel
@@ -73,7 +73,11 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen overflow-hidden pb-32">
+    <div className="h-screen flex flex-col"
+         style={{ 
+           touchAction: 'manipulation',
+           overflowX: 'hidden'
+         }}>
       {/* Fancy Header */}
       <header className="relative overflow-hidden">
         {/* Background with gradient */}
@@ -199,7 +203,11 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="px-6 h-full overflow-y-auto">
+      <div className="flex-1 px-6 overflow-y-auto pb-24"
+           style={{ 
+             touchAction: 'pan-y',
+             overscrollBehavior: 'contain'
+           }}>
         <div className="max-w-sm mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <h2 

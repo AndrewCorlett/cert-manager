@@ -84,28 +84,49 @@ export default function CertificateViewer() {
   }
 
   return (
-    <div className="min-h-screen relative">
-      {/* File Viewer - Full Screen */}
-      <div className="absolute inset-0">
-        <UniversalFileViewer 
-          fileUrl={certificate.fileUrl || certificate.pdfUrl || ''} 
-          fileName={certificate.name}
-          className="w-full h-full"
-        />
+    <div className="h-screen flex flex-col"
+         style={{ 
+           touchAction: 'manipulation',
+           overflowX: 'hidden'
+         }}>
+      {/* Compact Header */}
+      <header className="flex-shrink-0 px-4 py-3 border-b"
+              style={{ 
+                backgroundColor: 'var(--grey-900)',
+                borderColor: 'var(--grey-700)'
+              }}>
+        <div className="flex items-center justify-between">
+          <button 
+            onClick={() => window.history.back()}
+            className="text-sm px-3 py-1 rounded-md"
+            style={{ 
+              color: 'var(--grey-300)',
+              backgroundColor: 'var(--grey-800)'
+            }}
+          >
+            ← Back
+          </button>
+          <h1 className="text-sm font-medium truncate mx-4"
+              style={{ color: 'var(--white-pure)' }}>
+            {certificate.name}
+          </h1>
+          <div className="w-16"></div> {/* Spacer for balance */}
+        </div>
+      </header>
+
+      {/* PDF Viewer - Auto-centered */}
+      <div className="flex-1 flex items-center justify-center p-4 overflow-hidden"
+           style={{ backgroundColor: 'var(--grey-900)' }}>
+        <div className="w-full h-full max-w-4xl">
+          <UniversalFileViewer 
+            fileUrl={certificate.fileUrl || certificate.pdfUrl || ''} 
+            fileName={certificate.name}
+            className="w-full h-full rounded-lg shadow-lg"
+          />
+        </div>
       </div>
 
-      {/* Certificate Name Badge */}
-      <div 
-        className="absolute top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-full z-30"
-        style={{ 
-          backgroundColor: 'var(--grey-900)',
-          color: 'var(--white-pure)'
-        }}
-      >
-        {certificate.name}
-      </div>
-
-      {/* Floating NavBar with Settings Active */}
+      {/* Floating NavBar */}
       <div className="relative z-40">
         <FloatingNavBar onModeChange={setNavMode}>
           {renderPanelContent()}
