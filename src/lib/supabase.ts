@@ -1,14 +1,37 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import CryptoJS from 'crypto-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+let supabaseInstance: SupabaseClient | null = null;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
+function getSupabase() {
+  if (!supabaseInstance) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.warn('Supabase environment variables not found. Running in offline mode.');
+      return null;
+    }
+    
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    });
+  }
+  
+  return supabaseInstance;
+}
+
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(target, prop, receiver) {
+    const instance = getSupabase();
+    if (!instance) {
+      throw new Error('Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.');
+    }
+    return Reflect.get(instance, prop, receiver);
+  }
 });
 
 // Client-side encryption utilities
@@ -63,18 +86,37 @@ export class ClientEncryption {
 
 // Auth utilities
 export async function signInAnonymously() {
-  const { data, error } = await supabase.auth.signInAnonymously();
+  const instance = getSupabase();
+  if (!instance) {
+    console.warn('Supabase not configured - skipping anonymous sign in');
+    return null;
+  }
+  
+  const { data, error } = await instance.auth.signInAnonymously();
   if (error) throw error;
   return data;
 }
 
 export async function getCurrentUser() {
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const instance = getSupabase();
+  if (!instance) {
+    return null;
+  }
+  
+  const { data: { user }, error } = await instance.auth.getUser();
   if (error) throw error;
   return user;
 }
 
 export async function signOut() {
-  const { error } = await supabase.auth.signOut();
+  const instance = getSupabase();
+  if (!instance) {
+    return;
+  }
+  
+  const { error } = await instance.auth.signOut();
   if (error) throw error;
 }
+
+// Export the getSupabase function for use in other modules
+export { getSupabase };

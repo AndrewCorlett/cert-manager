@@ -1,1 +1,0 @@
-self.__REACT_LOADABLE_MANIFEST='{"lib/pdf-text-extractor.ts -> pdfjs-dist":{"id":7941,"files":["static/chunks/7a49ec60.b64020a91ac91831.js","static/chunks/145.36a8151117f2e16d.js"]}}';

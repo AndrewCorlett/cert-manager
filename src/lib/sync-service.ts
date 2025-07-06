@@ -1,4 +1,4 @@
-import { supabase, signInAnonymously, getCurrentUser } from './supabase';
+import { getSupabase, signInAnonymously, getCurrentUser } from './supabase';
 import { localStorageManager } from './local-storage';
 import { Certificate } from './store';
 
@@ -10,6 +10,13 @@ export class SyncService {
     // Initialize local storage
     await localStorageManager.init();
 
+    // Check if Supabase is available
+    const supabase = getSupabase();
+    if (!supabase) {
+      console.warn('Supabase not configured - running in offline mode');
+      return;
+    }
+
     // Sign in anonymously if not already signed in
     const user = await getCurrentUser();
     if (!user) {
@@ -20,8 +27,10 @@ export class SyncService {
     const currentUser = await getCurrentUser();
     this.userId = currentUser?.id || null;
 
-    // Start periodic sync
-    this.startPeriodicSync();
+    // Start periodic sync only if we have a user
+    if (this.userId) {
+      this.startPeriodicSync();
+    }
   }
 
   private startPeriodicSync(): void {
@@ -53,6 +62,9 @@ export class SyncService {
   }
 
   private async uploadPendingCertificates(): Promise<void> {
+    const supabase = getSupabase();
+    if (!supabase) return;
+    
     const pendingCerts = await localStorageManager.getPendingCertificates();
     
     for (const cert of pendingCerts) {
@@ -86,6 +98,9 @@ export class SyncService {
   }
 
   private async downloadRemoteCertificates(): Promise<void> {
+    const supabase = getSupabase();
+    if (!supabase) return;
+    
     try {
       // Fetch certificates from the decrypted view
       const { data: remoteCerts, error } = await supabase
@@ -165,7 +180,8 @@ export class SyncService {
     await localStorageManager.deleteCertificate(id);
     
     // Delete from Supabase
-    if (this.userId) {
+    const supabase = getSupabase();
+    if (this.userId && supabase) {
       const { error } = await supabase
         .from('certificates')
         .delete()
