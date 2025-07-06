@@ -84,13 +84,16 @@ export default function UploadPage() {
     }
   };
 
-  const handleAcceptAIResults = () => {
+  const handleAcceptAIResults = async () => {
     if (!selectedFile || !previewUrl || !aiResults) return;
     
     const now = new Date();
     const defaultExpiry = new Date(now.getTime() + 5 * 365 * 24 * 60 * 60 * 1000); // 5 years default
     
-    addCertificate({
+    // Read file data
+    const arrayBuffer = await selectedFile.arrayBuffer();
+    
+    await addCertificate({
       name: aiResults.certificateName || aiResults.fileName || 'Untitled Certificate',
       category: (aiResults.category as 'STCW' | 'GWO' | 'OPITO' | 'Contracts' | 'Other') || 'Other',
       filePath: `/certificates/${selectedFile.name}`,
@@ -99,18 +102,21 @@ export default function UploadPage() {
       serialNumber: aiResults.certificateNumber || `CERT-${Date.now()}`,
       status: 'valid',
       pdfUrl: previewUrl,
-    });
+      fileType: 'pdf',
+    }, arrayBuffer);
     
     // Navigate to home
     window.location.href = '/';
   };
 
-  const handleManualUpload = () => {
+  const handleManualUpload = async () => {
     if (!selectedFile || !previewUrl) return;
     
-    // TODO BACKEND:UPLOAD_FILE
+    // Read file data
+    const arrayBuffer = await selectedFile.arrayBuffer();
+    
     // Add certificate with basic info
-    addCertificate({
+    await addCertificate({
       name: selectedFile.name.replace('.pdf', ''),
       category: 'Other',
       filePath: `/certificates/${selectedFile.name}`,
@@ -119,7 +125,8 @@ export default function UploadPage() {
       serialNumber: `CERT-${Date.now()}`,
       status: 'valid',
       pdfUrl: previewUrl,
-    });
+      fileType: 'pdf',
+    }, arrayBuffer);
     
     window.location.href = '/';
   };

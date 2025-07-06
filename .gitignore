@@ -1,8 +1,14 @@
 node_modules/
 dist/
 .env
+.env.local
 database.db
 .DS_Store
 *.log
 .vscode/
 .idea/
+.next/
+playwright-report/
+test-results/
+non-codebase/
+New folder/

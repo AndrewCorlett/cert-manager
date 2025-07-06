@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { syncService } from './sync-service';
 
 export interface Certificate {
   id: string;
@@ -18,11 +19,13 @@ export interface CertificateStore {
   certificates: Certificate[];
   selectedCertificates: string[];
   currentViewingCert: Certificate | null;
+  isInitialized: boolean;
   
   // Actions
-  addCertificate: (cert: Omit<Certificate, 'id'>) => void;
+  initialize: () => Promise<void>;
+  addCertificate: (cert: Omit<Certificate, 'id'>, fileData?: ArrayBuffer) => Promise<void>;
   updateCertificate: (id: string, updates: Partial<Certificate>) => void;
-  deleteCertificate: (id: string) => void;
+  deleteCertificate: (id: string) => Promise<void>;
   toggleCertificateSelection: (id: string) => void;
   clearSelection: () => void;
   setCurrentViewingCert: (cert: Certificate | null) => void;
@@ -31,8 +34,9 @@ export interface CertificateStore {
   getCertificatesByCategory: (category: string) => Certificate[];
   getStatistics: () => { expired: number; valid: number; upcoming: number };
   
-  // TODO BACKEND:FETCH_CERTS
+  // Backend operations
   fetchCertificates: () => Promise<void>;
+  getCertificateFile: (id: string) => Promise<ArrayBuffer | null>;
 }
 
 // Mock data for development
@@ -118,18 +122,48 @@ const mockCertificates: Certificate[] = [
 ];
 
 export const useCertStore = create<CertificateStore>((set, get) => ({
-  certificates: mockCertificates,
+  certificates: [],
   selectedCertificates: [],
   currentViewingCert: null,
+  isInitialized: false,
 
-  addCertificate: (cert) => {
+  initialize: async () => {
+    if (get().isInitialized) return;
+    
+    try {
+      // Initialize sync service
+      await syncService.initialize();
+      
+      // Load certificates from local storage
+      const certificates = await syncService.getCertificates();
+      set({ certificates, isInitialized: true });
+      
+      // Trigger initial sync
+      syncService.sync().catch(console.error);
+    } catch (error) {
+      console.error('Failed to initialize store:', error);
+      // Fall back to mock data in case of error
+      set({ certificates: mockCertificates, isInitialized: true });
+    }
+  },
+
+  addCertificate: async (cert, fileData) => {
     const newCert: Certificate = {
       ...cert,
       id: Date.now().toString(),
     };
+    
+    // Add to store immediately for UI responsiveness
     set((state) => ({
       certificates: [...state.certificates, newCert],
     }));
+    
+    // Upload to sync service
+    try {
+      await syncService.uploadCertificate(newCert, fileData);
+    } catch (error) {
+      console.error('Failed to sync certificate:', error);
+    }
   },
 
   updateCertificate: (id, updates) => {
@@ -138,14 +172,23 @@ export const useCertStore = create<CertificateStore>((set, get) => ({
         cert.id === id ? { ...cert, ...updates } : cert
       ),
     }));
+    // TODO: Implement update sync
   },
 
-  deleteCertificate: (id) => {
+  deleteCertificate: async (id) => {
+    // Remove from store immediately
     set((state) => ({
       certificates: state.certificates.filter((cert) => cert.id !== id),
       selectedCertificates: state.selectedCertificates.filter((certId) => certId !== id),
       currentViewingCert: state.currentViewingCert?.id === id ? null : state.currentViewingCert,
     }));
+    
+    // Delete from sync service
+    try {
+      await syncService.deleteCertificate(id);
+    } catch (error) {
+      console.error('Failed to delete certificate:', error);
+    }
   },
 
   toggleCertificateSelection: (id) => {
@@ -181,11 +224,17 @@ export const useCertStore = create<CertificateStore>((set, get) => ({
     return stats;
   },
 
-  // TODO BACKEND:FETCH_CERTS
   fetchCertificates: async () => {
-    // Mock implementation - replace with actual Supabase call
-    console.log('Fetching certificates from backend...');
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // set({ certificates: fetchedCertificates });
+    try {
+      await syncService.sync();
+      const certificates = await syncService.getCertificates();
+      set({ certificates });
+    } catch (error) {
+      console.error('Failed to fetch certificates:', error);
+    }
+  },
+  
+  getCertificateFile: async (id: string) => {
+    return syncService.getCertificateFile(id);
   },
 }));

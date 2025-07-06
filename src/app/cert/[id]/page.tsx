@@ -12,17 +12,45 @@ export default function CertificateViewer() {
   const params = useParams();
   const [navMode, setNavMode] = useState<NavMode>('collapsed');
   const [certificate, setCertificate] = useState<Certificate | null>(null);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
   
   const certificates = useCertStore((state) => state.certificates);
   const setCurrentViewingCert = useCertStore((state) => state.setCurrentViewingCert);
   const clearSelection = useCertStore((state) => state.clearSelection);
+  const getCertificateFile = useCertStore((state) => state.getCertificateFile);
 
   useEffect(() => {
     const certId = params.id as string;
     const cert = certificates.find(c => c.id === certId);
     setCertificate(cert || null);
     setCurrentViewingCert(cert || null);
-  }, [params.id, certificates, setCurrentViewingCert]);
+    
+    // Load file from backend if certificate exists
+    if (cert) {
+      getCertificateFile(cert.id).then((fileData) => {
+        if (fileData) {
+          // Create blob URL from file data
+          const blob = new Blob([fileData], { 
+            type: cert.fileType === 'pdf' ? 'application/pdf' : 'image/jpeg' 
+          });
+          const url = URL.createObjectURL(blob);
+          setFileUrl(url);
+        } else if (cert.fileUrl || cert.pdfUrl) {
+          // Fallback to existing URLs
+          setFileUrl(cert.fileUrl || cert.pdfUrl || null);
+        }
+      });
+    }
+  }, [params.id, certificates, setCurrentViewingCert, getCertificateFile]);
+  
+  // Cleanup blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (fileUrl && fileUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(fileUrl);
+      }
+    };
+  }, [fileUrl]);
 
   const handleSend = async (selectedCerts: string[]) => {
     try {
@@ -219,7 +247,7 @@ export default function CertificateViewer() {
            style={{ backgroundColor: 'var(--grey-900)' }}>
         <div className="w-full h-full max-w-4xl">
           <UniversalFileViewer 
-            fileUrl={certificate.fileUrl || certificate.pdfUrl || ''} 
+            fileUrl={fileUrl || ''} 
             fileName={certificate.name}
             className="w-full h-full rounded-lg shadow-lg"
           />
