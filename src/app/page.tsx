@@ -5,7 +5,7 @@ import FileTree from '@/components/FileTree';
 import FloatingNavBar, { NavMode } from '@/components/FloatingNavBar';
 import SendPanel from '@/components/SendPanel';
 import SettingsPanel from '@/components/SettingsPanel';
-import { useCertStore } from '@/lib/store';
+import { useCertStore, Certificate } from '@/lib/store';
 
 export default function Home() {
   const [navMode, setNavMode] = useState<NavMode>('collapsed');
@@ -21,20 +21,120 @@ export default function Home() {
     setNavMode('settings.doc');
   };
 
-  const handleSend = (selectedCerts: string[]) => {
-    // TODO BACKEND:SEND_CERTIFICATES
-    console.log('Sending certificates:', selectedCerts);
-    
-    // Create mailto link
-    const subject = 'Professional Certificates';
-    const body = 'Please find my professional certificates attached.\n\nBest regards,\n[Your Name]';
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
-    window.open(mailtoLink, '_self');
+  const handleSend = async (selectedCerts: string[]) => {
+    try {
+      // Get certificate objects
+      const certsToSend = certificates.filter(cert => selectedCerts.includes(cert.id));
+      
+      if (certsToSend.length === 0) {
+        alert('No certificates selected');
+        return;
+      }
+
+      // Check if Web Share API is supported and has file sharing capability
+      if ('share' in navigator && 'canShare' in navigator) {
+        await shareViaWebAPI(certsToSend);
+      } else {
+        // Fallback: Download files and open email client
+        await shareViaDownload(certsToSend);
+      }
+    } catch (error) {
+      console.error('Error sharing certificates:', error);
+      // Fallback to original mailto approach
+      shareViaEmail(selectedCerts);
+    }
     
     // Reset state
     clearSelection();
     setNavMode('collapsed');
+  };
+
+  const shareViaWebAPI = async (certificates: Certificate[]) => {
+    const files: File[] = [];
+    
+    for (const cert of certificates) {
+      try {
+        const fileUrl = cert.fileUrl || cert.pdfUrl;
+        if (!fileUrl) continue;
+        
+        // Fetch the file as blob
+        const response = await fetch(fileUrl);
+        const blob = await response.blob();
+        
+        // Create File object
+        const fileName = `${cert.name}.${cert.fileType === 'pdf' ? 'pdf' : 'jpg'}`;
+        const file = new File([blob], fileName, { type: blob.type });
+        files.push(file);
+      } catch (error) {
+        console.error(`Failed to fetch file for ${cert.name}:`, error);
+      }
+    }
+
+    if (files.length === 0) {
+      throw new Error('No files could be prepared for sharing');
+    }
+
+    const shareData = {
+      title: 'Professional Certificates',
+      text: `Sharing ${files.length} professional certificate${files.length > 1 ? 's' : ''}`,
+      files: files
+    };
+
+    // Check if the data can be shared
+    if (navigator.canShare(shareData)) {
+      await navigator.share(shareData);
+    } else {
+      throw new Error('Files cannot be shared via Web Share API');
+    }
+  };
+
+  const shareViaDownload = async (certificates: Certificate[]) => {
+    // If only one certificate, download it directly
+    if (certificates.length === 1) {
+      const cert = certificates[0];
+      const fileUrl = cert.fileUrl || cert.pdfUrl;
+      if (fileUrl) {
+        const fileName = `${cert.name}.${cert.fileType === 'pdf' ? 'pdf' : 'jpg'}`;
+        downloadFile(fileUrl, fileName);
+      }
+    } else {
+      // Multiple certificates: create a ZIP file (simplified approach)
+      alert(`Downloading ${certificates.length} certificates individually. Please attach them to your email manually.`);
+      
+      for (const cert of certificates) {
+        const fileUrl = cert.fileUrl || cert.pdfUrl;
+        if (fileUrl) {
+          const fileName = `${cert.name}.${cert.fileType === 'pdf' ? 'pdf' : 'jpg'}`;
+          // Small delay between downloads to avoid browser blocking
+          setTimeout(() => downloadFile(fileUrl, fileName), 100);
+        }
+      }
+    }
+    
+    // Open email client after downloads
+    setTimeout(() => {
+      const subject = 'Professional Certificates';
+      const body = `Please find my ${certificates.length} professional certificate${certificates.length > 1 ? 's' : ''} attached.\n\nCertificates included:\n${certificates.map(c => `- ${c.name}`).join('\n')}\n\nBest regards,\n[Your Name]`;
+      const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(mailtoLink, '_self');
+    }, 500);
+  };
+
+  const downloadFile = (url: string, filename: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const shareViaEmail = (selectedCerts: string[]) => {
+    // Original fallback method
+    const subject = 'Professional Certificates';
+    const body = `Please find my professional certificates attached.\n\nSelected: ${selectedCerts.length} certificate${selectedCerts.length > 1 ? 's' : ''}\nNote: Files need to be attached manually due to browser limitations.\n\nBest regards,\n[Your Name]`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(mailtoLink, '_self');
   };
 
   const renderPanelContent = () => {
