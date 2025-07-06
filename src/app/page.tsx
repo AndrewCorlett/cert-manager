@@ -73,7 +73,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen pb-32">
+    <div className="h-screen overflow-hidden pb-32">
       {/* Fancy Header */}
       <header className="relative overflow-hidden">
         {/* Background with gradient */}
@@ -199,7 +199,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="px-6">
+      <div className="px-6 h-full overflow-y-auto">
         <div className="max-w-sm mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <h2 

@@ -159,6 +159,14 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     font-feature-settings: "kern" 1;
+    
+    /* Prevent mobile scrolling and zooming */
+    touch-action: manipulation;
+    overscroll-behavior: none;
+    overflow: hidden;
+    height: 100vh;
+    position: fixed;
+    width: 100%;
   }
   
   /* Smooth theme transitions */
@@ -257,14 +265,48 @@
     transform: scale(0.98);
   }
   
-  /* Smooth scrolling */
+  /* Prevent mobile scrolling and zooming */
   html {
-    scroll-behavior: smooth;
+    touch-action: manipulation;
+    overscroll-behavior: none;
+    overflow: hidden;
+    height: 100vh;
+    position: fixed;
+    width: 100%;
   }
   
   /* Selection color */
   ::selection {
     background-color: var(--gold-accent);
     color: var(--grey-900);
+  }
+  
+  /* Additional mobile fixes */
+  @media (max-width: 768px) {
+    body {
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Prevent rubber band scrolling */
+    .blur-backdrop {
+      touch-action: none;
+      overscroll-behavior: none;
+    }
+    
+    /* Ensure navbar stays in viewport */
+    .navbar-shadow {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      min-height: 72px;
+      max-height: 70vh;
+    }
+    
+    /* Prevent zoom on double tap */
+    button, 
+    [role="button"] {
+      touch-action: manipulation;
+    }
   }
 }
