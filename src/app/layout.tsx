@@ -28,13 +28,13 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#2D2D2D" />
+        <meta name="theme-color" content="#2D2D2D" id="theme-color" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{ backgroundColor: 'var(--grey-900)' }}
+        style={{ backgroundColor: 'var(--grey-900)', transition: 'background-color 0.3s ease' }}
       >
         <ThemeProvider>
           <StoreInitializer>

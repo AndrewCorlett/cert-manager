@@ -4,8 +4,8 @@
   "description": "Professional certificate management application",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#2D2D2D",
+  "background_color": "#2D2D2D",
+  "theme_color": "#121212",
   "orientation": "portrait",
   "categories": ["productivity", "business"],
   "icons": [

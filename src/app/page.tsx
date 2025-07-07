@@ -176,10 +176,11 @@ export default function Home() {
     <div className="h-screen flex flex-col"
          style={{ 
            touchAction: 'manipulation',
-           overflowX: 'hidden'
+           overflowX: 'hidden',
+           backgroundColor: 'var(--grey-900)'
          }}>
-      {/* Fancy Header */}
-      <header className="relative overflow-hidden">
+      {/* Fancy Header - Fixed */}
+      <header className="relative overflow-hidden fixed top-0 left-0 right-0 z-40">
         {/* Background with gradient */}
         <div 
           className="absolute inset-0"
@@ -306,7 +307,8 @@ export default function Home() {
       <div className="flex-1 px-6 overflow-y-auto pb-24"
            style={{ 
              touchAction: 'pan-y',
-             overscrollBehavior: 'contain'
+             overscrollBehavior: 'contain',
+             paddingTop: 'calc(140px + 2rem)' /* Header height + extra spacing */
            }}>
         <div className="max-w-sm mx-auto space-y-6">
           <div className="flex items-center justify-between">
