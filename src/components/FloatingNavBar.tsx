@@ -435,7 +435,7 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
       </motion.div>
       
       {/* Icons positioned absolutely relative to viewport bottom - prevents vertical movement during collapse */}
-      <div className="fixed left-1/2 z-50" style={{ x: '-50%', bottom: '24px' }}>
+      <div className="fixed left-1/2 z-50" style={{ transform: 'translateX(-50%)', bottom: '24px' }}>
         <div className="flex items-center h-[72px] relative px-0" style={{ width: 'clamp(90%, 350px, 100%)', maxWidth: '350px', minWidth: '90%' }}>
           {['home', 'list', 'send', 'settings'].map((icon, index) => {
             const isActiveIcon = icon === activeIcon;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, AlertCircle, Save, Calendar, FileText, Hash } from 'lucide-react';
+import { X, AlertCircle, Save, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface DocumentData {

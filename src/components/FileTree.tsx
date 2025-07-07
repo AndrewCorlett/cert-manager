@@ -7,6 +7,16 @@ import { useCertStore } from '@/lib/store';
 import FileUploadModal from './FileUploadModal';
 import DocumentValidationModal from './DocumentValidationModal';
 
+interface DocumentData {
+  name: string;
+  category: string;
+  issuedDate: string;
+  expiryDate: string;
+  certificateNumber: string;
+  issuingOrganization: string;
+  filePath?: string;
+}
+
 interface FileTreeProps {
   showSelection?: boolean;
   onFileSelect?: (certId: string) => void;
@@ -17,7 +27,7 @@ export default function FileTree({ showSelection = false, onFileSelect, onLongPr
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isValidationModalOpen, setIsValidationModalOpen] = useState(false);
-  const [aiProcessedData, setAiProcessedData] = useState<any>(null);
+  const [aiProcessedData, setAiProcessedData] = useState<Partial<DocumentData> | null>(null);
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [aiProcessingFailed, setAiProcessingFailed] = useState(false);
   const certificates = useCertStore((state) => state.certificates);
@@ -140,21 +150,20 @@ export default function FileTree({ showSelection = false, onFileSelect, onLongPr
     setIsValidationModalOpen(true);
   };
 
-  const handleDocumentSave = async (validatedData: any) => {
+  const handleDocumentSave = async (validatedData: DocumentData) => {
     try {
       if (!currentFile) return;
 
       // Create the final certificate data
       const certificateData = {
         name: validatedData.name,
-        category: validatedData.category,
+        category: validatedData.category as 'STCW' | 'GWO' | 'OPITO' | 'Contracts' | 'Other',
         filePath: `/certificates/${currentFile.name}`,
         issueDate: validatedData.issuedDate,
         expiryDate: validatedData.expiryDate,
         serialNumber: validatedData.certificateNumber || `CERT-${Date.now()}`,
         status: 'valid' as const,
-        pdfUrl: URL.createObjectURL(currentFile),
-        issuingOrganization: validatedData.issuingOrganization
+        pdfUrl: URL.createObjectURL(currentFile)
       };
 
       addCertificate(certificateData);
