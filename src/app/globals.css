@@ -127,9 +127,9 @@
 /* Light theme variables */
 [data-theme="light"] {
   --grey-900: #FFFFFF;
-  --grey-700: #F3F4F6;
+  --grey-700: #E2E8F0; /* Darker gray for navbar */
   --grey-500: #4B5563; /* Darker gray for better contrast */
-  --white-pure: #111827; /* Darker text for better contrast */
+  --white-pure: #1E293B; /* Much darker text for better contrast */
   --gold-accent: #92400E; /* Darker gold for better contrast */
   --error-red: #DC2626;
   --success-green: #059669;

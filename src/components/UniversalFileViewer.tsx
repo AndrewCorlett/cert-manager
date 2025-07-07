@@ -41,7 +41,7 @@ export default function UniversalFileViewer({ fileUrl, className = '', fileName 
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--white-pure)] mx-auto mb-4"></div>
           <p style={{ color: 'var(--white-pure)' }}>Loading file...</p>
         </div>
       </div>

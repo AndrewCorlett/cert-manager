@@ -351,7 +351,7 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
           width: 'clamp(90%, 350px, 100%)',
           maxWidth: '350px',
           minWidth: '90%',
-          backgroundColor: '#121212', // Always dark grey-900 regardless of theme
+          backgroundColor: 'var(--grey-700)', // Theme-aware background
           touchAction: 'none', // Prevent scrolling on navbar
           overscrollBehavior: 'none',
         }}
@@ -391,7 +391,7 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
                 {/* Visual drag indicator - fixed position, non-draggable */}
                 <div 
                   className="w-8 h-1 rounded-full opacity-40 pointer-events-none"
-                  style={{ backgroundColor: '#FFFFFF' }}
+                  style={{ backgroundColor: 'var(--white-pure)' }}
                 />
               </div>
               
@@ -408,7 +408,7 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
                 <div
                   className="absolute inset-0 pointer-events-none z-10"
                   style={{
-                    background: `rgba(18, 18, 18, ${dragProgress * 0.9})`, // Fade to navbar background color
+                    background: `color-mix(in srgb, var(--grey-700) ${dragProgress * 90}%, transparent)`, // Fade to navbar background color
                     transition: isAnimating ? 'background-color 0.3s ease' : 'none',
                   }}
                 />
@@ -470,7 +470,7 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
                   y: 0,
                   opacity: 1,
                   scale: 1,
-                  color: isActiveIcon ? '#C89B3C' : '#FFFFFF',
+                  color: isActiveIcon ? 'var(--gold-accent)' : 'var(--white-pure)',
                   size: 28,
                 };
               } else {
@@ -489,7 +489,7 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
                   const currentX = Math.min(targetX, collapsedX); // Cannot go further right than home position
                   
                   const currentScale = 1.1 + (1 - 1.1) * clampedProgress; // Scale from 1.1 to 1.0
-                  const currentColor = clampedProgress > 0.5 ? '#FFFFFF' : '#C89B3C';
+                  const currentColor = clampedProgress > 0.5 ? 'var(--white-pure)' : 'var(--gold-accent)';
                   const currentSize = 32 + (28 - 32) * clampedProgress; // Size from 32 to 28
                   
                   return {
@@ -508,7 +508,7 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
                       y: 0,
                       opacity: 1,
                       scale: 1,
-                      color: '#FFFFFF',
+                      color: 'var(--white-pure)',
                       size: 28,
                     };
                   }
@@ -523,7 +523,7 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
                       y: 0,
                       opacity: 0, // Hidden when fully expanded
                       scale: 1,
-                      color: '#FFFFFF',
+                      color: 'var(--white-pure)',
                       size: 28,
                     };
                   }
@@ -547,7 +547,7 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
                     y: 0, // Always 0 - no vertical movement
                     opacity: currentOpacity,
                     scale: 1,
-                    color: '#FFFFFF',
+                    color: 'var(--white-pure)',
                     size: 28,
                   };
                 }

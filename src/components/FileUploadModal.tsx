@@ -96,7 +96,8 @@ export default function FileUploadModal({ isOpen, onClose, onFileUpload }: FileU
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="fixed inset-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 backdrop-blur-md"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
             onClick={onClose}
           />
 
@@ -109,15 +110,18 @@ export default function FileUploadModal({ isOpen, onClose, onFileUpload }: FileU
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
             <div 
-              className="w-full max-w-md rounded-lg p-6"
-              style={{ backgroundColor: '#1E1E1E' }}
+              className="w-full max-w-md rounded-lg p-6 border"
+              style={{ 
+                backgroundColor: 'var(--grey-700)',
+                borderColor: 'var(--grey-500)'
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h3 
                   className="text-lg font-semibold"
-                  style={{ color: '#FFFFFF' }}
+                  style={{ color: 'var(--white-pure)' }}
                 >
                   Add Certificate
                 </h3>
@@ -125,18 +129,21 @@ export default function FileUploadModal({ isOpen, onClose, onFileUpload }: FileU
                   onClick={onClose}
                   className="p-1 rounded-full hover:bg-gray-600 transition-colors"
                 >
-                  <X size={20} color="#FFFFFF" />
+                  <X size={20} color="var(--white-pure)" />
                 </button>
               </div>
 
               {/* Error Message */}
               {error && (
                 <div 
-                  className="flex items-center gap-2 p-3 rounded-lg mb-4"
-                  style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA' }}
+                  className="flex items-center gap-2 p-3 rounded-lg mb-4 border"
+                  style={{ 
+                    backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                    borderColor: 'var(--error-red)'
+                  }}
                 >
-                  <AlertCircle size={16} color="#DC2626" />
-                  <span style={{ color: '#DC2626', fontSize: '14px' }}>{error}</span>
+                  <AlertCircle size={16} color="var(--error-red)" />
+                  <span style={{ color: 'var(--error-red)', fontSize: '14px' }}>{error}</span>
                 </div>
               )}
 
@@ -144,7 +151,7 @@ export default function FileUploadModal({ isOpen, onClose, onFileUpload }: FileU
               {isProcessing && (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold-accent mx-auto mb-4"></div>
-                  <p style={{ color: '#FFFFFF' }}>Processing document with AI...</p>
+                  <p style={{ color: 'var(--white-pure)' }}>Processing document with AI...</p>
                 </div>
               )}
 
@@ -153,18 +160,20 @@ export default function FileUploadModal({ isOpen, onClose, onFileUpload }: FileU
                 <div className="space-y-4">
                   {/* Drag & Drop Area */}
                   <div
-                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                      isDragging ? 'border-gold-accent bg-opacity-10' : 'border-gray-500'
-                    }`}
+                    className="border-2 border-dashed rounded-lg p-6 text-center transition-colors"
+                    style={{
+                      borderColor: isDragging ? 'var(--gold-accent)' : 'var(--grey-500)',
+                      backgroundColor: isDragging ? 'rgba(200, 155, 60, 0.1)' : 'transparent'
+                    }}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                   >
-                    <FileText size={32} color="#9CA3AF" className="mx-auto mb-2" />
-                    <p style={{ color: '#FFFFFF', marginBottom: '8px' }}>
+                    <FileText size={32} color="var(--grey-500)" className="mx-auto mb-2" />
+                    <p style={{ color: 'var(--white-pure)', marginBottom: '8px' }}>
                       Drag and drop your certificate here
                     </p>
-                    <p style={{ color: '#9CA3AF', fontSize: '14px' }}>
+                    <p style={{ color: 'var(--grey-500)', fontSize: '14px' }}>
                       PDF or image files only
                     </p>
                   </div>
@@ -174,21 +183,27 @@ export default function FileUploadModal({ isOpen, onClose, onFileUpload }: FileU
                     <Button
                       onClick={handleFileExplorerClick}
                       variant="ghost"
-                      className="h-auto py-4 flex flex-col items-center gap-2 border border-gray-500 hover:border-gold-accent transition-all"
-                      style={{ backgroundColor: 'transparent' }}
+                      className="h-auto py-4 flex flex-col items-center gap-2 border transition-all"
+                      style={{ 
+                        backgroundColor: 'transparent',
+                        borderColor: 'var(--grey-500)'
+                      }}
                     >
-                      <Upload size={24} color="#FFFFFF" />
-                      <span style={{ color: '#FFFFFF' }}>File Explorer</span>
+                      <Upload size={24} color="var(--white-pure)" />
+                      <span style={{ color: 'var(--white-pure)' }}>File Explorer</span>
                     </Button>
 
                     <Button
                       onClick={handleCameraClick}
                       variant="ghost"
-                      className="h-auto py-4 flex flex-col items-center gap-2 border border-gray-500 hover:border-gold-accent transition-all"
-                      style={{ backgroundColor: 'transparent' }}
+                      className="h-auto py-4 flex flex-col items-center gap-2 border transition-all"
+                      style={{ 
+                        backgroundColor: 'transparent',
+                        borderColor: 'var(--grey-500)'
+                      }}
                     >
-                      <Camera size={24} color="#FFFFFF" />
-                      <span style={{ color: '#FFFFFF' }}>Camera</span>
+                      <Camera size={24} color="var(--white-pure)" />
+                      <span style={{ color: 'var(--white-pure)' }}>Camera</span>
                     </Button>
                   </div>
 

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ChevronRight, Plus } from 'lucide-react';
 import { useCertStore } from '@/lib/store';
 import FileUploadModal from './FileUploadModal';
+import DocumentValidationModal from './DocumentValidationModal';
 
 interface FileTreeProps {
   showSelection?: boolean;
@@ -15,6 +16,10 @@ interface FileTreeProps {
 export default function FileTree({ showSelection = false, onFileSelect, onLongPress }: FileTreeProps) {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isValidationModalOpen, setIsValidationModalOpen] = useState(false);
+  const [aiProcessedData, setAiProcessedData] = useState<any>(null);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const [aiProcessingFailed, setAiProcessingFailed] = useState(false);
   const certificates = useCertStore((state) => state.certificates);
   const selectedCertificates = useCertStore((state) => state.selectedCertificates);
   const toggleCertificateSelection = useCertStore((state) => state.toggleCertificateSelection);
@@ -33,21 +38,21 @@ export default function FileTree({ showSelection = false, onFileSelect, onLongPr
       // Expired
       return {
         status: 'expired',
-        textColor: '#ef4444', // red
+        textColor: 'var(--error-red)', // theme-aware red
         textDecoration: 'line-through'
       };
     } else if (daysDiff <= notificationDays) {
       // Due for expiry within notification period
       return {
         status: 'expiring',
-        textColor: '#ef4444', // red
+        textColor: 'var(--error-red)', // theme-aware red
         textDecoration: 'none'
       };
     } else {
       // Valid
       return {
         status: 'valid',
-        textColor: '#ffffff', // white
+        textColor: 'var(--white-pure)', // theme-aware text
         textDecoration: 'none'
       };
     }
@@ -81,36 +86,90 @@ export default function FileTree({ showSelection = false, onFileSelect, onLongPr
   };
 
   const handleFileUpload = async (file: File) => {
+    // Store the file for later use
+    setCurrentFile(file);
+
+    let aiData = {};
+    let aiProcessingFailed = false;
+
     try {
       // TODO: Replace with actual API key check
       const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
       
       if (!apiKey) {
-        throw new Error('API key is not configured. Please add your OpenAI API key to environment variables.');
+        console.warn('API key not configured - using manual input mode');
+        aiProcessingFailed = true;
+      } else {
+        // Process with AI (mock data for now)
+        // In real implementation, this would call your AI service
+        try {
+          aiData = {
+            name: file.name.replace(/\.(pdf|jpg|jpeg|png)$/i, ''),
+            category: 'STCW', // AI would determine this
+            issuedDate: '', // AI would extract this - leaving empty to test validation
+            expiryDate: '', // AI would extract this - leaving empty to test validation
+            certificateNumber: `AI-${Date.now()}`,
+            issuingOrganization: '' // AI would extract this
+          };
+          console.log('AI processing completed successfully');
+        } catch (aiError) {
+          console.warn('AI processing failed - falling back to manual input:', aiError);
+          aiProcessingFailed = true;
+        }
       }
+    } catch (error) {
+      console.warn('API configuration error - falling back to manual input:', error);
+      aiProcessingFailed = true;
+    }
 
-      // For now, create a mock certificate with file information
-      // In a real implementation, this would send the file to AI for processing
-      const mockProcessedData = {
+    // If AI processing failed, provide empty data for manual input
+    if (aiProcessingFailed) {
+      aiData = {
         name: file.name.replace(/\.(pdf|jpg|jpeg|png)$/i, ''),
-        category: 'STCW' as const, // Default category, AI would determine this
-        filePath: `/certificates/${file.name}`,
-        issueDate: new Date().toISOString().split('T')[0],
-        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 year from now
-        serialNumber: `AI-${Date.now()}`,
+        category: '',
+        issuedDate: '',
+        expiryDate: '',
+        certificateNumber: '',
+        issuingOrganization: ''
+      };
+    }
+
+    setAiProcessedData(aiData);
+    setAiProcessingFailed(aiProcessingFailed);
+    setIsUploadModalOpen(false);
+    setIsValidationModalOpen(true);
+  };
+
+  const handleDocumentSave = async (validatedData: any) => {
+    try {
+      if (!currentFile) return;
+
+      // Create the final certificate data
+      const certificateData = {
+        name: validatedData.name,
+        category: validatedData.category,
+        filePath: `/certificates/${currentFile.name}`,
+        issueDate: validatedData.issuedDate,
+        expiryDate: validatedData.expiryDate,
+        serialNumber: validatedData.certificateNumber || `CERT-${Date.now()}`,
         status: 'valid' as const,
-        pdfUrl: URL.createObjectURL(file)
+        pdfUrl: URL.createObjectURL(currentFile),
+        issuingOrganization: validatedData.issuingOrganization
       };
 
-      addCertificate(mockProcessedData);
+      addCertificate(certificateData);
       
-      // Show success message
-      console.log('Certificate added successfully:', mockProcessedData);
+      // Reset state
+      setCurrentFile(null);
+      setAiProcessedData(null);
+      setAiProcessingFailed(false);
+      setIsValidationModalOpen(false);
+      
+      console.log('Certificate added successfully:', certificateData);
       
     } catch (error) {
-      // This will show the API key error as requested
-      alert(error instanceof Error ? error.message : 'Failed to process document');
-      console.error('Upload error:', error);
+      console.error('Error saving document:', error);
+      alert('Failed to save document');
     }
   };
 
@@ -220,6 +279,21 @@ export default function FileTree({ showSelection = false, onFileSelect, onLongPr
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         onFileUpload={handleFileUpload}
+      />
+
+      {/* Document Validation Modal */}
+      <DocumentValidationModal
+        isOpen={isValidationModalOpen}
+        onClose={() => {
+          setIsValidationModalOpen(false);
+          setCurrentFile(null);
+          setAiProcessedData(null);
+          setAiProcessingFailed(false);
+        }}
+        onSave={handleDocumentSave}
+        aiData={aiProcessedData || {}}
+        fileName={currentFile?.name || ''}
+        aiProcessingFailed={aiProcessingFailed}
       />
     </div>
   );

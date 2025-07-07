@@ -38,7 +38,7 @@ export default function PDFViewer({ pdfUrl, className = '' }: PDFViewerProps) {
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--white-pure)] mx-auto mb-4"></div>
           <p style={{ color: 'var(--white-pure)' }}>Loading PDF...</p>
         </div>
       </div>
@@ -83,7 +83,7 @@ export default function PDFViewer({ pdfUrl, className = '' }: PDFViewerProps) {
           <button
             onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
             disabled={pageNumber <= 1}
-            className="px-3 py-1 rounded bg-white/10 text-white disabled:opacity-50"
+            className="px-3 py-1 rounded bg-white/10 text-[var(--white-pure)] disabled:opacity-50"
           >
             Previous
           </button>
@@ -95,7 +95,7 @@ export default function PDFViewer({ pdfUrl, className = '' }: PDFViewerProps) {
           <button
             onClick={() => setPageNumber(Math.min(numPages, pageNumber + 1))}
             disabled={pageNumber >= numPages}
-            className="px-3 py-1 rounded bg-white/10 text-white disabled:opacity-50"
+            className="px-3 py-1 rounded bg-white/10 text-[var(--white-pure)] disabled:opacity-50"
           >
             Next
           </button>

@@ -184,7 +184,7 @@ export default function Home() {
         <div 
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(135deg, #1E1E1E 0%, #2D2D2D 50%, #1E1E1E 100%)',
+            background: 'linear-gradient(135deg, var(--grey-700) 0%, var(--grey-900) 50%, var(--grey-700) 100%)',
           }}
         />
         
@@ -214,7 +214,7 @@ export default function Home() {
                 >
                   <span 
                     className="text-lg font-bold"
-                    style={{ color: '#1E1E1E' }}
+                    style={{ color: 'var(--grey-700)' }}
                   >
                     C
                   </span>

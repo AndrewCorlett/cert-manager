@@ -10,8 +10,8 @@ export default function StatWidget() {
     <div 
       className="rounded-lg p-6 flex items-center justify-between shadow-lg"
       style={{ 
-        backgroundColor: '#1E1E1E', // Consistent dark background for contrast
-        border: '1px solid #3B3B3B' // Subtle border for definition
+        backgroundColor: 'var(--grey-700)', // Theme-aware background
+        border: '1px solid var(--grey-500)' // Theme-aware border
       }}
     >
       <div className="flex flex-col items-center">

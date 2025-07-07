@@ -90,14 +90,14 @@ export default function SendPanel({ step, onStepChange, onSend, currentCertId }:
             className="w-full py-4 text-left justify-start border-0 outline-none shadow-none transition-all duration-200"
             style={{
               backgroundColor: selectedOption === 'this-doc' ? '#C89B3C' : 'var(--grey-700)',
-              color: '#FFFFFF',
+              color: 'var(--white-pure)',
               border: 'none',
               outline: 'none',
               boxShadow: 'none',
               transform: selectedOption === 'this-doc' ? 'scale(1.02)' : 'scale(1)',
             }}
           >
-            <span style={{ color: '#FFFFFF', fontWeight: selectedOption === 'this-doc' ? '600' : '400' }}>
+            <span style={{ color: 'var(--white-pure)', fontWeight: selectedOption === 'this-doc' ? '600' : '400' }}>
               This Document Only
             </span>
           </Button>
@@ -108,14 +108,14 @@ export default function SendPanel({ step, onStepChange, onSend, currentCertId }:
             className="w-full py-4 text-left justify-start border-0 outline-none shadow-none transition-all duration-200"
             style={{
               backgroundColor: selectedOption === 'multiple' ? '#C89B3C' : 'var(--grey-700)',
-              color: '#FFFFFF',
+              color: 'var(--white-pure)',
               border: 'none',
               outline: 'none',
               boxShadow: 'none',
               transform: selectedOption === 'multiple' ? 'scale(1.02)' : 'scale(1)',
             }}
           >
-            <span style={{ color: '#FFFFFF', fontWeight: selectedOption === 'multiple' ? '600' : '400' }}>
+            <span style={{ color: 'var(--white-pure)', fontWeight: selectedOption === 'multiple' ? '600' : '400' }}>
               Select Multiple
             </span>
           </Button>

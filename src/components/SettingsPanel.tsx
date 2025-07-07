@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { useCertStore } from '@/lib/store';
 import { useThemeStore } from '@/lib/theme-store';
 import { Sun, Moon } from 'lucide-react';
@@ -30,7 +31,7 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
         <h3 
           className="text-lg font-semibold border-b pb-2"
           style={{ 
-            color: '#FFFFFF', // Explicit white for consistency
+            color: 'var(--white-pure)', // Explicit white for consistency
             borderColor: 'var(--grey-500)'
           }}
         >
@@ -41,7 +42,7 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
           <div>
             <label 
               className="block text-sm font-medium mb-2"
-              style={{ color: '#FFFFFF' }}
+              style={{ color: 'var(--white-pure)' }}
             >
               Google Email
             </label>
@@ -62,7 +63,7 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
           <div>
             <label 
               className="block text-sm font-medium mb-2"
-              style={{ color: '#FFFFFF' }}
+              style={{ color: 'var(--white-pure)' }}
             >
               Notification Days
             </label>
@@ -87,7 +88,7 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
         <h4 
           className="text-md font-semibold border-b pb-2 mt-6"
           style={{ 
-            color: '#FFFFFF',
+            color: 'var(--white-pure)',
             borderColor: 'var(--grey-500)'
           }}
         >
@@ -98,7 +99,7 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
           <div>
             <label 
               className="block text-sm font-medium mb-2"
-              style={{ color: '#FFFFFF' }}
+              style={{ color: 'var(--white-pure)' }}
             >
               Email Template
             </label>
@@ -123,7 +124,7 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
         <h4 
           className="text-md font-semibold border-b pb-2 mt-6"
           style={{ 
-            color: '#FFFFFF',
+            color: 'var(--white-pure)',
             borderColor: 'var(--grey-500)'
           }}
         >
@@ -133,17 +134,15 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
         <div className="space-y-4">
           <div>
             <label 
-              className="block text-sm font-medium mb-2"
-              style={{ color: '#FFFFFF' }}
+              className="block text-sm font-medium mb-3"
+              style={{ color: 'var(--white-pure)' }}
             >
               Theme
             </label>
-            <Button
-              onClick={toggleTheme}
-              className="w-full p-3 justify-start"
+            <div 
+              className="flex items-center justify-between p-3 rounded-lg"
               style={{
                 backgroundColor: 'var(--grey-700)',
-                color: 'var(--white-pure)',
                 border: `1px solid var(--grey-500)`
               }}
             >
@@ -154,15 +153,32 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
                   <Sun size={20} color="var(--gold-accent)" />
                 )}
                 <div>
-                  <div className="font-medium">
+                  <div 
+                    className="font-medium"
+                    style={{ color: 'var(--white-pure)' }}
+                  >
                     {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
                   </div>
-                  <div className="text-sm opacity-75">
-                    Tap to switch to {theme === 'dark' ? 'light' : 'dark'} theme
+                  <div 
+                    className="text-sm opacity-75"
+                    style={{ color: 'var(--white-pure)' }}
+                  >
+                    Switch between themes
                   </div>
                 </div>
               </div>
-            </Button>
+              <ToggleSwitch
+                checked={theme === 'dark'}
+                onChange={(checked) => {
+                  if (checked && theme === 'light') {
+                    toggleTheme();
+                  } else if (!checked && theme === 'dark') {
+                    toggleTheme();
+                  }
+                }}
+                size="md"
+              />
+            </div>
           </div>
           
           <Button
@@ -211,7 +227,7 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
         <div>
           <label 
             className="block text-sm font-medium mb-1"
-            style={{ color: '#FFFFFF' }}
+            style={{ color: 'var(--white-pure)' }}
           >
             File Location
           </label>
@@ -236,7 +252,7 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
         <div>
           <label 
             className="block text-sm font-medium mb-1"
-            style={{ color: '#FFFFFF' }}
+            style={{ color: 'var(--white-pure)' }}
           >
             Issue Date
           </label>
@@ -256,7 +272,7 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
         <div>
           <label 
             className="block text-sm font-medium mb-1"
-            style={{ color: '#FFFFFF' }}
+            style={{ color: 'var(--white-pure)' }}
           >
             Expiry Date
           </label>
@@ -276,7 +292,7 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
         <div>
           <label 
             className="block text-sm font-medium mb-1"
-            style={{ color: '#FFFFFF' }}
+            style={{ color: 'var(--white-pure)' }}
           >
             Cert no.
           </label>
