@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, animate } from 'framer-motion';
 import { Home, List, Send, Settings } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
@@ -20,9 +20,11 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
   const [contentHeight, setContentHeight] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const [touchStartY, setTouchStartY] = useState(0);
   const [isSwipeDetected, setIsSwipeDetected] = useState(false);
+  const [iconsAtHome, setIconsAtHome] = useState(false);
 
   const isExpanded = mode !== 'collapsed';
   const activeIcon = getActiveIcon(mode, pathname);
@@ -67,6 +69,9 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
       
       // After a short delay, trigger the mode change to expand the panel
       setTimeout(() => {
+        // Reset icons at home state for new expansion
+        setIconsAtHome(false);
+        
         switch (iconType) {
           case 'home':
             // Navigate to home if not already there, do nothing if already on home
@@ -136,14 +141,19 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
     
     const dragDistance = Math.max(0, info.offset.y); // Only allow downward drag
     
-    // Calculate drag progress based on available drag distance
+    // Calculate drag progress based on available drag distance to minimum height
     const expandedHeight = getMaxExpandedHeight();
-    const collapsedHeight = 72;
-    const maxDragDistance = expandedHeight - collapsedHeight;
+    const minHeight = 120; // Minimum height restriction
+    const maxDragDistance = expandedHeight - minHeight;
     
-    // Calculate progress (0 = fully expanded, 1 = fully collapsed)
+    // Calculate progress (0 = fully expanded, 1 = at minimum height)
     const progress = Math.min(1, dragDistance / maxDragDistance);
     setDragProgress(progress);
+    
+    // Track when icons reach home positions
+    if (progress >= 0.8 && !iconsAtHome) {
+      setIconsAtHome(true);
+    }
     
     // Don't set currentDragY - we want height change, not position change
   };
@@ -162,14 +172,24 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
       // Snap to collapsed state
       setMode('collapsed');
       setDragProgress(0);
+      setIconsAtHome(false); // Reset icons at home state
       
       // Add haptic feedback if available
       if (navigator.vibrate) {
         navigator.vibrate(10); // Light tick
       }
     } else {
-      // Snap back to expanded state
+      // Snap back to expanded state - but keep icons at home if they reached there
       setDragProgress(0);
+      // Don't reset iconsAtHome - keep them at home positions
+      
+      // Reset drag element position to ensure it remains responsive
+      if (dragRef.current) {
+        animate(dragRef.current, 
+          { y: 0 }, 
+          { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }
+        );
+      }
     }
     
     // Allow interactions again after animation completes
@@ -179,6 +199,7 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
   const handleClickOutside = () => {
     if (isExpanded) {
       setMode('collapsed');
+      setIconsAtHome(false); // Reset icons at home state
     }
   };
 
@@ -238,10 +259,14 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
     // Use the smaller of content-based height or max height
     const expandedHeight = Math.min(baseHeight, maxHeight);
     const collapsedHeight = 72;
+    const minHeight = 120; // Minimum height to prevent icons from moving vertically
     
-    // Interpolate between expanded height and collapsed height based on drag progress
-    const currentHeight = expandedHeight - (expandedHeight - collapsedHeight) * dragProgress;
-    return currentHeight;
+    // Interpolate between expanded height and minimum height based on drag progress
+    const targetHeight = Math.max(collapsedHeight, minHeight);
+    const currentHeight = expandedHeight - (expandedHeight - targetHeight) * dragProgress;
+    
+    // Ensure we never go below the minimum height
+    return Math.max(currentHeight, minHeight);
   };
 
   // Get the maximum expanded height for calculations
@@ -351,12 +376,13 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
               <div className="w-full h-6 flex items-center justify-center relative">
                 {/* Invisible drag area that covers the entire width */}
                 <motion.div
+                  ref={dragRef}
                   className="absolute inset-0 cursor-grab active:cursor-grabbing"
                   style={{
                     touchAction: 'none',
                   }}
                   drag="y"
-                  dragConstraints={{ top: 0, bottom: getMaxExpandedHeight() - 72 }}
+                  dragConstraints={{ top: 0, bottom: getMaxExpandedHeight() - 120 }}
                   dragElastic={0}
                   onDragStart={handleDragStart}
                   onDrag={handleDrag}
@@ -404,16 +430,38 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
 
         {/* Icons Row - positioned at bottom */}
         <div className="flex items-center h-[72px] relative overflow-hidden px-6">
+          {/* This div will be empty during animations - icons are positioned absolutely below */}
+        </div>
+      </motion.div>
+      
+      {/* Icons positioned absolutely relative to viewport bottom - prevents vertical movement during collapse */}
+      <div className="fixed left-1/2 z-50" style={{ x: '-50%', bottom: '24px' }}>
+        <div className="flex items-center h-[72px] relative px-0" style={{ width: 'clamp(90%, 350px, 100%)', maxWidth: '350px', minWidth: '90%' }}>
           {['home', 'list', 'send', 'settings'].map((icon, index) => {
             const isActiveIcon = icon === activeIcon;
             
             // Calculate unified icon positions for smooth transitions
             const getIconProps = () => {
-              // Calculate collapsed positions (evenly spaced)
-              const totalWidth = 280; // Available width for icon distribution
-              const iconSpacing = totalWidth / 3; // 3 gaps between 4 icons
-              const startOffset = -totalWidth / 2; // Start from left edge
-              const collapsedX = startOffset + (index * iconSpacing);
+              // Calculate collapsed positions (evenly spaced) - use dynamic width calculation
+              const getAvailableWidth = () => {
+                if (typeof window === 'undefined') return 280; // Fallback for SSR
+                const viewportWidth = window.innerWidth;
+                // Match the navbar CSS: clamp(90%, 350px, 100%) = min(max(90%, 350px), 100%)
+                const navbarWidth = Math.min(Math.max(viewportWidth * 0.9, 350), viewportWidth);
+                const padding = 32; // Add some padding to keep icons away from edges
+                return navbarWidth - padding;
+              };
+              
+              const totalWidth = getAvailableWidth();
+              // For 4 icons evenly spaced and centered:
+              // Account for icon button size (44px including padding) and distribute remaining space
+              const iconButtonSize = 44; // p-2 = 8px padding on each side + 28px icon = 44px total
+              const totalIconSpace = iconButtonSize * 4; // Space taken by all 4 icons
+              const remainingSpace = totalWidth - totalIconSpace; // Space available for gaps
+              const iconSpacing = remainingSpace / 3; // 3 gaps between 4 icons
+              const totalSpanWidth = totalIconSpace + (iconSpacing * 3); // Total width of icon group
+              const startX = -totalSpanWidth / 2 + (iconButtonSize / 2); // Start from center, account for icon center
+              const collapsedX = startX + (index * (iconButtonSize + iconSpacing));
               
               if (!isExpanded) {
                 // Collapsed state: all icons in their natural positions
@@ -426,37 +474,77 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
                   size: 28,
                 };
               } else {
-                // Expanded state with drag progress
+                // Expanded state with drag progress and home position locking
                 if (isActiveIcon) {
-                  // Active icon: interpolate between left position (expanded) and collapsed position based on drag progress
+                  // Allow movement back toward expanded position, but prevent moving past home position
+                  
+                  // Active icon: interpolate between left position (expanded) and collapsed position
                   const expandedX = -150; // translateX(-150px) when fully expanded (left side)
                   
                   const clampedProgress = Math.min(1, Math.max(0, dragProgress));
-                  const currentX = expandedX + (collapsedX - expandedX) * clampedProgress;
+                  
+                  // When dragProgress reaches 1, navbar is at 120px height - all icons should be at home
+                  const targetX = expandedX + (collapsedX - expandedX) * clampedProgress;
+                  // Clamp position to prevent moving past home position, but allow movement back toward expanded
+                  const currentX = Math.min(targetX, collapsedX); // Cannot go further right than home position
+                  
                   const currentScale = 1.1 + (1 - 1.1) * clampedProgress; // Scale from 1.1 to 1.0
                   const currentColor = clampedProgress > 0.5 ? '#FFFFFF' : '#C89B3C';
                   const currentSize = 32 + (28 - 32) * clampedProgress; // Size from 32 to 28
                   
                   return {
                     x: currentX,
-                    y: 0,
+                    y: 0, // Always 0 - no vertical movement
                     opacity: 1,
                     scale: currentScale,
                     color: currentColor,
                     size: currentSize,
                   };
                 } else {
-                  // Inactive icons: interpolate between off-screen and collapsed positions
-                  const isLeftSideIcon = index <= 1; // home, list
-                  const expandedX = isLeftSideIcon ? -250 : 250; // Off-screen positions
+                  // If icons have reached home, keep them there regardless of drag progress
+                  if (iconsAtHome) {
+                    return {
+                      x: collapsedX,
+                      y: 0,
+                      opacity: 1,
+                      scale: 1,
+                      color: '#FFFFFF',
+                      size: 28,
+                    };
+                  }
                   
+                  // Inactive icons: hide when fully expanded, show during drag
                   const clampedProgress = Math.min(1, Math.max(0, dragProgress));
-                  const currentX = expandedX + (collapsedX - expandedX) * clampedProgress;
-                  const currentOpacity = clampedProgress; // Fade in as user drags toward collapsed
+                  
+                  // When fully expanded (dragProgress = 0), hide inactive icons completely
+                  if (clampedProgress < 0.3) {
+                    return {
+                      x: collapsedX,
+                      y: 0,
+                      opacity: 0, // Hidden when fully expanded
+                      scale: 1,
+                      color: '#FFFFFF',
+                      size: 28,
+                    };
+                  }
+                  
+                  // Start from a moderate offset and move toward home
+                  const isLeftSideIcon = index <= 1; // home, list
+                  const startOffset = isLeftSideIcon ? -80 : 80; // Closer starting position
+                  const expandedX = collapsedX + startOffset; // Start near home position
+                  
+                  // When dragProgress reaches 0.8, all icons should be at home positions
+                  const targetX = expandedX + (collapsedX - expandedX) * clampedProgress;
+                  // Allow free movement for inactive icons - they should animate back to expanded positions
+                  const currentX = targetX;
+                  
+                  // Fade in as user starts dragging (from 30% drag progress onward)
+                  const opacityProgress = (clampedProgress - 0.3) / 0.7; // Normalize from 0.3-1.0 to 0-1.0
+                  const currentOpacity = Math.max(0, opacityProgress);
                   
                   return {
                     x: currentX,
-                    y: 0,
+                    y: 0, // Always 0 - no vertical movement
                     opacity: currentOpacity,
                     scale: 1,
                     color: '#FFFFFF',
@@ -484,9 +572,12 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
                   ease: [0.25, 0.46, 0.45, 0.94]
                 }}
                 onClick={() => handleIconClick(icon)}
-                className="absolute p-2 rounded-full"
+                className="absolute p-2 rounded-full flex items-center justify-center"
                 style={{
                   left: '50%',
+                  top: '50%',
+                  marginLeft: '-22px', // Half of icon button width (44px/2)
+                  marginTop: '-22px',  // Half of icon button height (44px/2)
                 }}
               >
                   {icon === 'home' && (
@@ -521,7 +612,7 @@ export default function FloatingNavBar({ onModeChange, children, mode: externalM
               );
             })}
         </div>
-      </motion.div>
+      </div>
     </>
   );
 }
