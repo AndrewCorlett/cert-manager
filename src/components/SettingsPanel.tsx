@@ -5,13 +5,16 @@ import { Button } from '@/components/ui/button';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { useCertStore } from '@/lib/store';
 import { useThemeStore } from '@/lib/theme-store';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, LogOut } from 'lucide-react';
+import { signOut } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 interface SettingsPanelProps {
   mode: 'home' | 'doc';
 }
 
 export default function SettingsPanel({ mode }: SettingsPanelProps) {
+  const router = useRouter();
   const [email, setEmail] = useState('user@example.com');
   const [notificationDays, setNotificationDays] = useState(30);
   const [emailTemplate, setEmailTemplate] = useState(
@@ -24,6 +27,15 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
   
   // Theme store
   const { theme, toggleTheme } = useThemeStore();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.push('/auth');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   if (mode === 'home') {
     return (
@@ -194,6 +206,31 @@ export default function SettingsPanel({ mode }: SettingsPanelProps) {
             }}
           >
             Save Settings
+          </Button>
+        </div>
+
+        <h4 
+          className="text-md font-semibold border-b pb-2 mt-6"
+          style={{ 
+            color: 'var(--white-pure)',
+            borderColor: 'var(--grey-500)'
+          }}
+        >
+          Account
+        </h4>
+        
+        <div className="space-y-4">
+          <Button
+            onClick={handleSignOut}
+            className="w-full py-3 flex items-center justify-center gap-2"
+            style={{
+              backgroundColor: 'var(--grey-700)',
+              color: 'var(--white-pure)',
+              border: '1px solid var(--grey-500)'
+            }}
+          >
+            <LogOut size={20} />
+            Sign Out
           </Button>
         </div>
       </div>

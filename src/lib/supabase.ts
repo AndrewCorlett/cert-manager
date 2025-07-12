@@ -17,6 +17,34 @@ function getSupabase() {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce', // Use PKCE flow for enhanced security
+        storage: {
+          getItem: (key) => {
+            if (typeof window !== 'undefined') {
+              return localStorage.getItem(key);
+            }
+            return null;
+          },
+          setItem: (key, value) => {
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(key, value);
+            }
+          },
+          removeItem: (key) => {
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem(key);
+            }
+          },
+        },
+      },
+      db: {
+        schema: 'public',
+      },
+      global: {
+        headers: {
+          'X-Client-Info': 'cert-manager-pwa',
+        },
       },
     });
   }
@@ -85,18 +113,6 @@ export class ClientEncryption {
 }
 
 // Auth utilities
-export async function signInAnonymously() {
-  const instance = getSupabase();
-  if (!instance) {
-    console.warn('Supabase not configured - skipping anonymous sign in');
-    return null;
-  }
-  
-  const { data, error } = await instance.auth.signInAnonymously();
-  if (error) throw error;
-  return data;
-}
-
 export async function getCurrentUser() {
   const instance = getSupabase();
   if (!instance) {
@@ -104,7 +120,7 @@ export async function getCurrentUser() {
   }
   
   const { data: { user }, error } = await instance.auth.getUser();
-  if (error) throw error;
+  if (error) return null;
   return user;
 }
 
