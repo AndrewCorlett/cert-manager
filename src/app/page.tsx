@@ -174,162 +174,162 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col"
-         style={{ 
-           touchAction: 'manipulation',
-           overflowX: 'hidden',
-           backgroundColor: 'var(--grey-900)'
-         }}>
-      {/* Fancy Header - Fixed */}
-      <header className="relative overflow-hidden fixed top-0 left-0 right-0 z-40">
-        {/* Background with gradient */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(135deg, var(--grey-700) 0%, var(--grey-900) 50%, var(--grey-700) 100%)',
-          }}
-        />
-        
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
+           style={{ 
+             touchAction: 'manipulation',
+             overflowX: 'hidden',
+             backgroundColor: 'var(--grey-900)'
+           }}>
+        {/* Fancy Header - Fixed */}
+        <header className="relative overflow-hidden fixed top-0 left-0 right-0 z-40">
+          {/* Background with gradient */}
           <div 
-            className="w-full h-full rounded-full"
-            style={{ backgroundColor: 'var(--gold-accent)' }}
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(135deg, var(--grey-700) 0%, var(--grey-900) 50%, var(--grey-700) 100%)',
+            }}
           />
-        </div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 opacity-5">
-          <div 
-            className="w-full h-full rounded-full"
-            style={{ backgroundColor: 'var(--gold-accent)' }}
-          />
-        </div>
-        
-        {/* Content */}
-        <div className="relative z-10 p-6 pb-8">
-          <div className="max-w-sm mx-auto">
-            {/* Top section */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div 
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: 'var(--gold-accent)' }}
-                >
-                  <span 
-                    className="text-lg font-bold"
-                    style={{ color: 'var(--grey-700)' }}
+          
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
+            <div 
+              className="w-full h-full rounded-full"
+              style={{ backgroundColor: 'var(--gold-accent)' }}
+            />
+          </div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 opacity-5">
+            <div 
+              className="w-full h-full rounded-full"
+              style={{ backgroundColor: 'var(--gold-accent)' }}
+            />
+          </div>
+          
+          {/* Content */}
+          <div className="relative z-10 p-6 pb-8">
+            <div className="max-w-sm mx-auto">
+              {/* Top section */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: 'var(--gold-accent)' }}
                   >
-                    C
-                  </span>
+                    <span 
+                      className="text-lg font-bold"
+                      style={{ color: 'var(--grey-700)' }}
+                    >
+                      C
+                    </span>
+                  </div>
+                  <div>
+                    <h1 
+                      className="text-2xl font-bold leading-tight"
+                      style={{ color: 'var(--white-pure)' }}
+                    >
+                      Cert Manager
+                    </h1>
+                    <p 
+                      className="text-xs"
+                      style={{ color: 'var(--grey-500)' }}
+                    >
+                      Professional Certificates
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h1 
-                    className="text-2xl font-bold leading-tight"
-                    style={{ color: 'var(--white-pure)' }}
-                  >
-                    Cert Manager
-                  </h1>
-                  <p 
-                    className="text-xs"
-                    style={{ color: 'var(--grey-500)' }}
-                  >
-                    Professional Certificates
-                  </p>
+                
+                {/* Status indicator */}
+                <div className="text-right">
+                  <div className="flex items-center gap-1">
+                    <div 
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: 'var(--success-green)' }}
+                    />
+                    <span 
+                      className="text-xs"
+                      style={{ color: 'var(--white-pure)' }}
+                    >
+                      Active
+                    </span>
+                  </div>
                 </div>
               </div>
               
-              {/* Status indicator */}
-              <div className="text-right">
-                <div className="flex items-center gap-1">
-                  <div 
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: 'var(--success-green)' }}
-                  />
-                  <span 
-                    className="text-xs"
-                    style={{ color: 'var(--white-pure)' }}
-                  >
-                    Active
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Stats bar */}
-            <div 
-              className="rounded-lg p-3 backdrop-blur-sm"
-              style={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}
-            >
-              <div className="flex items-center justify-between text-xs">
-                <div className="text-center">
-                  <div 
-                    className="font-semibold"
-                    style={{ color: 'var(--white-pure)' }}
-                  >
-                    {certificates.length}
+              {/* Stats bar */}
+              <div 
+                className="rounded-lg p-3 backdrop-blur-sm"
+                style={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}
+              >
+                <div className="flex items-center justify-between text-xs">
+                  <div className="text-center">
+                    <div 
+                      className="font-semibold"
+                      style={{ color: 'var(--white-pure)' }}
+                    >
+                      {certificates.length}
+                    </div>
+                    <div style={{ color: 'var(--grey-500)' }}>Total</div>
                   </div>
-                  <div style={{ color: 'var(--grey-500)' }}>Total</div>
-                </div>
-                <div className="text-center">
-                  <div 
-                    className="font-semibold"
-                    style={{ color: 'var(--success-green)' }}
-                  >
-                    {certificates.filter(c => c.status === 'valid').length}
+                  <div className="text-center">
+                    <div 
+                      className="font-semibold"
+                      style={{ color: 'var(--success-green)' }}
+                    >
+                      {certificates.filter(c => c.status === 'valid').length}
+                    </div>
+                    <div style={{ color: 'var(--grey-500)' }}>Valid</div>
                   </div>
-                  <div style={{ color: 'var(--grey-500)' }}>Valid</div>
-                </div>
-                <div className="text-center">
-                  <div 
-                    className="font-semibold"
-                    style={{ color: 'var(--warn-amber)' }}
-                  >
-                    {certificates.filter(c => c.status === 'upcoming').length}
+                  <div className="text-center">
+                    <div 
+                      className="font-semibold"
+                      style={{ color: 'var(--warn-amber)' }}
+                    >
+                      {certificates.filter(c => c.status === 'upcoming').length}
+                    </div>
+                    <div style={{ color: 'var(--grey-500)' }}>Expiring</div>
                   </div>
-                  <div style={{ color: 'var(--grey-500)' }}>Expiring</div>
-                </div>
-                <div className="text-center">
-                  <div 
-                    className="font-semibold"
-                    style={{ color: 'var(--error-red)' }}
-                  >
-                    {certificates.filter(c => c.status === 'expired').length}
+                  <div className="text-center">
+                    <div 
+                      className="font-semibold"
+                      style={{ color: 'var(--error-red)' }}
+                    >
+                      {certificates.filter(c => c.status === 'expired').length}
+                    </div>
+                    <div style={{ color: 'var(--grey-500)' }}>Expired</div>
                   </div>
-                  <div style={{ color: 'var(--grey-500)' }}>Expired</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="flex-1 px-6 overflow-y-auto pb-24"
-           style={{ 
-             touchAction: 'pan-y',
-             overscrollBehavior: 'contain',
-             paddingTop: 'calc(140px + 2rem)' /* Header height + extra spacing */
-           }}>
-        <div className="max-w-sm mx-auto space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 
-              className="text-2xl font-semibold"
-              style={{ color: 'var(--white-pure)' }}
-            >
-              HOME
-            </h2>
+        <div className="flex-1 px-6 overflow-y-auto pb-24"
+             style={{ 
+               touchAction: 'pan-y',
+               overscrollBehavior: 'contain',
+               paddingTop: 'calc(10px + 2rem)' /* Reduced top padding */
+             }}>
+          <div className="max-w-sm mx-auto space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 
+                className="text-2xl font-semibold"
+                style={{ color: 'var(--white-pure)' }}
+              >
+                HOME
+              </h2>
+            </div>
+          
+            <FileTree 
+              onFileSelect={handleFileSelect}
+              onLongPress={handleLongPress}
+            />
           </div>
-        
-          <FileTree 
-            onFileSelect={handleFileSelect}
-            onLongPress={handleLongPress}
-          />
         </div>
+
+        <FloatingNavBar onModeChange={setNavMode}>
+          {renderPanelContent()}
+        </FloatingNavBar>
       </div>
-
-      <FloatingNavBar onModeChange={setNavMode}>
-        {renderPanelContent()}
-      </FloatingNavBar>
-    </div>
   );
 }
