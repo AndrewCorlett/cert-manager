@@ -1,10 +1,11 @@
-import { getSupabase, signInAnonymously, getCurrentUser } from './supabase';
+import { getSupabase, getCurrentUser } from './supabase';
 import { localStorageManager } from './local-storage';
 import { Certificate } from './store';
 
 export class SyncService {
   private syncInProgress = false;
   private userId: string | null = null;
+  private syncTimer: NodeJS.Timeout | null = null;
 
   async initialize(): Promise<void> {
     // Initialize local storage
@@ -17,13 +18,7 @@ export class SyncService {
       return;
     }
 
-    // Sign in anonymously if not already signed in
-    const user = await getCurrentUser();
-    if (!user) {
-      await signInAnonymously();
-    }
-    
-    // Get current user
+    // Get current user (now requires proper authentication)
     const currentUser = await getCurrentUser();
     this.userId = currentUser?.id || null;
 
@@ -34,12 +29,24 @@ export class SyncService {
   }
 
   private startPeriodicSync(): void {
+    // Clear existing timer if any
+    if (this.syncTimer) {
+      clearInterval(this.syncTimer);
+    }
+    
     // Sync every 30 seconds
-    setInterval(() => {
-      if (!this.syncInProgress) {
+    this.syncTimer = setInterval(() => {
+      if (!this.syncInProgress && this.userId) {
         this.sync().catch(console.error);
       }
     }, 30000);
+  }
+
+  private stopPeriodicSync(): void {
+    if (this.syncTimer) {
+      clearInterval(this.syncTimer);
+      this.syncTimer = null;
+    }
   }
 
   async sync(): Promise<void> {
@@ -200,6 +207,30 @@ export class SyncService {
 
   async getCertificateFile(id: string): Promise<ArrayBuffer | null> {
     return localStorageManager.getCertificateFile(id);
+  }
+
+  // User management methods for auth integration
+  async setUser(userId: string): Promise<void> {
+    this.userId = userId;
+    
+    // Start periodic sync if not already running
+    if (!this.syncInProgress) {
+      this.startPeriodicSync();
+    }
+    
+    // Trigger immediate sync with new user
+    await this.sync();
+  }
+
+  async clearUser(): Promise<void> {
+    this.userId = null;
+    this.stopPeriodicSync();
+    // Note: We don't clear local data as it might be needed offline
+    // Only stop automatic syncing
+  }
+
+  getUserId(): string | null {
+    return this.userId;
   }
 }
 
